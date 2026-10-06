@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+    branches: [develop, qa, main]
+  pull_request:
+
+jobs:
+  layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Anexo J -db layout
+        run: |
+          test -f 01_ddl/V001__create_payments.sql
+          test -f 03_dcl/V002__table_grants_payment_app.sql
+          test -f 05_rollbacks/U001__drop_payments.sql
+          test -f deploy/compose.yml
+          ! grep -E "image: postgres" deploy/compose.yml
+          grep -q "payment.payments" 01_ddl/V001__create_payments.sql
+          grep -q "amount_cents" 01_ddl/V001__create_payments.sql
+          grep -q "idempotency_key" 01_ddl/V001__create_payments.sql
